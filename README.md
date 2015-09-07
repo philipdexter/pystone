@@ -35,7 +35,8 @@ you run it** you need to run the `clear` command (fix this in future).
 
 Sometimes it seems to get stuck somehow in the middle of a game. If
 this happens just Ctrl-C and restart it in `track` mode (fix this in
-future).
+future). The log file contents will still be there so you will
+not lose any state.
 
 ## Future Plans
 

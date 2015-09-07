@@ -62,7 +62,7 @@ def loop(f):
         line = f.readline().strip()
         if not line:
             continue
-        r = re.compile(r'^\[Zone\].*TRANSITIONING.*name=(.*)id.*zone=(HAND|DECK).*player=(.*)]')
+        r = re.compile(r'^\[Zone\].*TRANSITIONING.*name=(.*)id.*zone=(HAND|DECK).*player=(.*)].*to FRIENDLY (PLAY|DECK)')
         m = r.match(line)
         if m:
             card = m.group(1).strip()

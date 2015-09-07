@@ -62,13 +62,19 @@ def loop(f):
         line = f.readline().strip()
         if not line:
             continue
-        r = re.compile(r'^\[Zone\].*TRANSITIONING.*name=(.*)id.*zone=(PLAY|HAND|DECK).*player=(.*)]')
+        r = re.compile(r'^\[Zone\].*TRANSITIONING.*name=(.*)id.*zone=(HAND|DECK).*player=(.*)]')
         m = r.match(line)
         if m:
             card = m.group(1).strip()
             action = m.group(2).strip()
             player = m.group(3).strip()
             yield (player, card, action)
+        else:
+            r = re.compile(r'^\[Zone\].*TRANSITIONING.*zone=PLAY.*player=(.*)].*to FRIENDLY PLAY \(Hero\)')
+            m = r.match(line)
+            if m:
+                player = m.group(1)
+                yield (player, 'HERO', '')
 
 @click.group()
 @click.argument('logfile', type=click.Path(exists=True))
@@ -79,15 +85,21 @@ def cli(ctx, logfile):
 @click.command(help='Start the main deck tracker')
 @click.pass_context
 def track(ctx):
+    me = '1'
     with open(ctx.obj['logfile'], 'r') as f:
-        print(HEADER+'--------\nleft in deck'+ENDC+':\n{}'.format('\n'.join(sorted([(determine_color(card)+'{}: {}'+ENDC).format(card, count) for card,count in sorted(my_current_deck.items(), key=lambda x: x[0])]))))
+        print(HEADER+'--------\nleft in deck'+ENDC+':\n{}'.format('\n'.join([(determine_color(card)+'{}: {}'+ENDC).format(card, count) for card,count in sorted(my_current_deck.items(), key=lambda x: x[0])])))
         for p, c, a in loop(f):
-            if p == '1':
+            if c == 'HERO':
+                me = p
+                continue
+            if p == me:
                 if a == 'HAND':
+                    print('msg: putting {} into HAND'.format(c))
                     draw(c)
                 elif a == 'DECK':
+                    print('msg: putting {} into DECK'.format(c))
                     put_back(c)
-            print(HEADER+'--------\nleft in deck'+ENDC+':\n{}'.format('\n'.join(sorted([(determine_color(card)+'{}: {}'+ENDC).format(card, count) for card,count in sorted(my_current_deck.items(), key=lambda x: x[0])]))))
+            print(HEADER+'--------\nleft in deck'+ENDC+':\n{}'.format('\n'.join([(determine_color(card)+'{}: {}'+ENDC).format(card, count) for card,count in sorted(my_current_deck.items(), key=lambda x: x[0])])))
 
 @click.command(help='Clear the hearthstone log file')
 @click.pass_context

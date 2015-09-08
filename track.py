@@ -91,6 +91,8 @@ def track(ctx):
         for p, c, a in loop(f):
             if c == 'HERO':
                 me = p
+                global my_current_deck
+                my_current_deck = copy.copy(my_deck)
                 continue
             if p == me:
                 if a == 'HAND':
